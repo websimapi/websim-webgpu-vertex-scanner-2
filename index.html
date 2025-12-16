@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WebGPU Vertex Scanner</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #111; color: #eee; font-family: sans-serif; }
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
+        
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .panel {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 12px;
+            pointer-events: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+        }
+
+        h1 { margin: 0 0 10px 0; font-size: 1.2rem; color: #4af; }
+        p { margin: 5px 0; font-size: 0.9rem; color: #ccc; }
+        
+        button {
+            background: #4af;
+            border: none;
+            color: #000;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        button:active { background: #38d; }
+        
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+        .control-group { flex: 1; min-width: 120px; }
+
+        input[type="file"] {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            text-align: center;
+            display: block;
+        }
+
+        #status {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 600px) {
+            .panel { width: 100%; max-width: none; }
+            h1 { font-size: 1rem; }
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://esm.sh/three@0.167.0/webgpu",
+                "three/webgpu": "https://esm.sh/three@0.167.0/webgpu",
+                "three/tsl": "https://esm.sh/three@0.167.0/tsl",
+                "three/addons/": "https://esm.sh/three@0.167.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-layer">
+        <div class="panel">
+            <h1>WebGPU Point Culling</h1>
+            <p>Points are culled in real-time based on the <b>Active Camera</b>.</p>
+            <p>Only points visible to <i>you</i> (frustum + front-facing) are rendered.</p>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <button id="toggle-view-btn">Switch Viewpoint</button>
+                </div>
+                <div class="control-group">
+                    <button onclick="document.getElementById('file-input').click()" class="upload-btn">Upload .GLTF / .OBJ</button>
+                    <input type="file" id="file-input" accept=".gltf,.glb,.obj">
+                </div>
+            </div>
+            <div id="status">Viewing: Observer Camera</div>
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
+
