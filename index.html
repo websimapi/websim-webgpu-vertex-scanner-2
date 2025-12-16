@@ -17,9 +17,26 @@
             pointer-events: none;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
+            align-items: flex-end;
             padding: 20px;
             box-sizing: border-box;
+        }
+
+        #stats-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #eee;
+            border: 1px solid #333;
+            pointer-events: none;
+            min-width: 150px;
+            z-index: 100;
         }
 
         .panel {
@@ -72,8 +89,10 @@
 
         /* Mobile adjustments */
         @media (max-width: 600px) {
-            .panel { width: 100%; max-width: none; }
+            #ui-layer { justify-content: flex-end; }
+            .panel { width: 100%; max-width: none; border-radius: 12px 12px 0 0; }
             h1 { font-size: 1rem; }
+            #stats-display { font-size: 12px; top: 10px; left: 10px; }
         }
     </style>
     <script type="importmap">
@@ -90,6 +109,12 @@
 <body>
 
     <div id="canvas-container"></div>
+
+    <div id="stats-display">
+        <div><span style="color:#888">FPS:</span> <span id="fps-val">--</span></div>
+        <div><span style="color:#4af">Visible:</span> <span id="vis-val">--</span></div>
+        <div><span style="color:#666">Total:</span> <span id="total-val">--</span></div>
+    </div>
 
     <div id="ui-layer">
         <div class="panel">

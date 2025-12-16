@@ -29,6 +29,13 @@ const _tmpWorld = new THREE.Vector3();
 const _tmpNormal = new THREE.Vector3();
 const _viewDir = new THREE.Vector3();
 
+// Stats globals
+let lastTime = 0;
+let frameCount = 0;
+const fpsElem = document.getElementById('fps-val');
+const visElem = document.getElementById('vis-val');
+const totalElem = document.getElementById('total-val');
+
 function init() {
     const container = document.getElementById('canvas-container');
 
@@ -268,8 +275,15 @@ function updateVisiblePoints(camera) {
     }
 
     // Update range and flag
-    geometry.setDrawRange(0, ptr / 3);
+    const count = ptr / 3;
+    geometry.setDrawRange(0, count);
     posAttribute.needsUpdate = true;
+
+    // Update UI Stats (Vertex count)
+    if (visElem && totalElem) {
+        visElem.innerText = count.toLocaleString();
+        totalElem.innerText = (basePositions.length / 3).toLocaleString();
+    }
 }
 
 function animate() {
@@ -288,6 +302,16 @@ function animate() {
     // Only show helper if we are observing (shows the OTHER camera)
     scannerHelper.visible = (activeCamera === observerCamera);
     if (scannerHelper.visible) scannerHelper.update();
+
+    // FPS Counter
+    const now = performance.now();
+    frameCount++;
+    if (now >= lastTime + 1000) {
+        const fps = Math.round((frameCount * 1000) / (now - lastTime));
+        if (fpsElem) fpsElem.innerText = fps;
+        frameCount = 0;
+        lastTime = now;
+    }
 
     renderer.render(scene, activeCamera);
 }
