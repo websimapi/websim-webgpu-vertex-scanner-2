@@ -97,10 +97,9 @@ function processGeometry(geometry) {
 
     // 1. Create Point Cloud (Scatter Plot)
     const pointGeo = new THREE.BufferGeometry();
-    pointGeo.setAttribute('position', geometry.getAttribute('position'));
 
     // Store original positions for visibility filtering
-    const srcAttr = pointGeo.getAttribute('position');
+    const srcAttr = geometry.getAttribute('position');
     basePositions = new Float32Array(srcAttr.array.length);
     basePositions.set(srcAttr.array);
 
@@ -113,9 +112,16 @@ function processGeometry(geometry) {
         baseNormals = null;
     }
 
+    // Create a dynamic buffer for the visible points
+    const positionAttribute = new THREE.BufferAttribute(new Float32Array(basePositions.length), 3);
+    positionAttribute.setUsage(THREE.DynamicDrawUsage);
+    pointGeo.setAttribute('position', positionAttribute);
+
     const pointMat = createRaycastMaterial();
     
     const points = new THREE.Points(pointGeo, pointMat);
+    points.frustumCulled = false; // Disable frustum culling as we manipulate points manually
+    pointGeo.setDrawRange(0, 0); // Start hidden until first update
     pointCloudGroup.add(points);
     scene.add(pointCloudGroup);
 }
@@ -211,8 +217,9 @@ function updateVisiblePoints(camera) {
     const camPos = new THREE.Vector3();
     camera.getWorldPosition(camPos);
 
-    // Allocate a buffer to store only the visible vertices
-    const visiblePositions = new Float32Array(basePositions.length);
+    // Update the existing position attribute
+    const posAttribute = geometry.attributes.position;
+    const outPositions = posAttribute.array;
     let ptr = 0;
 
     for (let i = 0; i < basePositions.length; i += 3) {
@@ -252,19 +259,17 @@ function updateVisiblePoints(camera) {
 
             if (isVisible) {
                 // Keep the original local-space position in the geometry
-                visiblePositions[ptr] = _tmpLocal.x;
-                visiblePositions[ptr + 1] = _tmpLocal.y;
-                visiblePositions[ptr + 2] = _tmpLocal.z;
+                outPositions[ptr] = _tmpLocal.x;
+                outPositions[ptr + 1] = _tmpLocal.y;
+                outPositions[ptr + 2] = _tmpLocal.z;
                 ptr += 3;
             }
         }
     }
 
-    // Resize geometry to visible subset
-    const finalPositions = visiblePositions.subarray(0, ptr);
-    geometry.setAttribute('position', new THREE.BufferAttribute(finalPositions, 3));
+    // Update range and flag
     geometry.setDrawRange(0, ptr / 3);
-    geometry.attributes.position.needsUpdate = true;
+    posAttribute.needsUpdate = true;
 }
 
 function animate() {
@@ -272,8 +277,13 @@ function animate() {
 
     controls.update();
 
-    // Update which vertices are visible from the ACTIVE camera
-    updateVisiblePoints(activeCamera);
+    // Update scanner matrices if it's not the active one (so it updates even when observing)
+    if (activeCamera !== scannerCamera) {
+        scannerCamera.updateMatrixWorld();
+    }
+
+    // Update which vertices are visible from the SCANNER camera always
+    updateVisiblePoints(scannerCamera);
 
     // Only show helper if we are observing (shows the OTHER camera)
     scannerHelper.visible = (activeCamera === observerCamera);
